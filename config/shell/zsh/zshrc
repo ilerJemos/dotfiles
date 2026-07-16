@@ -1,15 +1,21 @@
-source ~/.config/zsh/common/env.sh
-source ~/.config/zsh/common/path.sh
-source ~/.config/zsh/common/alias.sh
-source ~/.config/zsh/common/functions.sh
+# config/shell/zsh/zshrc
+# zsh 配置入口：共享模块 → 平台特定 → zsh 专属 → 本机私有
+# 共享部分位于 config/shell/common/，bash 与 zsh 复用（POSIX 兼容）
 
+# --- 共享部分（bash/zsh 通用）---
+[ -f ~/.config/shell/common/env.sh ]       && source ~/.config/shell/common/env.sh
+[ -f ~/.config/shell/common/path.sh ]      && source ~/.config/shell/common/path.sh
+[ -f ~/.config/shell/common/alias.sh ]     && source ~/.config/shell/common/alias.sh
+[ -f ~/.config/shell/common/functions.sh ] && source ~/.config/shell/common/functions.sh
+
+# --- 平台特定（与 shell 无关）---
 case "$(uname)" in
-    Darwin)
-        source ~/.config/zsh/platform/macos.sh
-        ;;
-    Linux)
-        source ~/.config/zsh/platform/linux.sh
-        ;;
+    Darwin) [ -f ~/.config/shell/platform/macos.sh ] && source ~/.config/shell/platform/macos.sh ;;
+    Linux)  [ -f ~/.config/shell/platform/linux.sh ] && source ~/.config/shell/platform/linux.sh ;;
 esac
 
-[ -f ~/.config/zsh/local.sh ] && source ~/.config/zsh/local.sh
+# --- zsh 专属（补全、提示符、键绑定、插件等）---
+# 待后续阶段补充
+
+# --- 本机私有配置（不纳入版本控制）---
+[ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh

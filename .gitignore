@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# 本机私有配置（仅保留 *.example 模板）
+local/local.sh
+local/secrets
+local/*.local
+
+# Shell 编译缓存
+*.zwc
+
+# 编辑器临时文件
+*.swp
+*~
+.idea/
+.vscode/
+
+# 日志
+*.log
