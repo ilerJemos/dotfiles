@@ -1,0 +1,15 @@
+source ~/.config/zsh/common/env.sh
+source ~/.config/zsh/common/path.sh
+source ~/.config/zsh/common/alias.sh
+source ~/.config/zsh/common/functions.sh
+
+case "$(uname)" in
+    Darwin)
+        source ~/.config/zsh/platform/macos.sh
+        ;;
+    Linux)
+        source ~/.config/zsh/platform/linux.sh
+        ;;
+esac
+
+[ -f ~/.config/zsh/local.sh ] && source ~/.config/zsh/local.sh
