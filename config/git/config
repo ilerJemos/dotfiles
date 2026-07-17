@@ -1,0 +1,53 @@
+# config/git/config - 全局 git 配置（XDG: ~/.config/git/config）
+# 身份信息（user.name/email）放 config.local，不入库。
+
+[include]
+    path = ~/.config/git/config.local
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[rebase]
+    autosquash = true
+    autostash = true
+
+[push]
+    default = current
+    autoSetupRemote = true
+
+[merge]
+    conflictstyle = zdiff3
+
+[diff]
+    algorithm = histogram
+
+[color]
+    ui = auto
+
+[core]
+    excludesfile = ~/.config/git/ignore
+    # 不设 core.editor：沿用 $EDITOR/$VISUAL（由 shell env.sh 提供）
+
+[alias]
+    s = status -sb
+    co = checkout
+    br = branch
+    ci = commit
+    sw = switch
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    lg = log --oneline --graph --decorate -20
+    ll = log --pretty=format:'%C(yellow)%h%Creset %C(green)(%cr)%Creset %C(bold)%s%Creset %C(blue)<%an>%Creset' --graph -20
+    amend = commit --amend --no-edit
+
+# --- 可选：delta 美化 diff（安装 git-delta 后取消注释）---
+# [core]
+#     pager = delta
+# [interactive]
+#     diffFilter = delta --color-only
+# [delta]
+#     navigate = true
+#     side-by-side = true

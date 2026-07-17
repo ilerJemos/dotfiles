@@ -1,6 +1,5 @@
-# config/shell/zsh/zshrc
-# zsh 配置入口：共享模块 -> 平台特定 -> 补全系统 -> zsh 专属 -> 本机私有
-# 共享部分位于 config/shell/common/，bash 与 zsh 复用（POSIX 兼容）
+# config/shell/bash/bashrc
+# bash 配置入口：共享模块 -> 平台特定 -> 补全系统 -> bash 专属 -> 本机私有
 
 # --- 共享部分（bash/zsh 通用）---
 [ -f ~/.config/shell/common/env.sh ]       && source ~/.config/shell/common/env.sh
@@ -8,22 +7,22 @@
 [ -f ~/.config/shell/common/alias.sh ]     && source ~/.config/shell/common/alias.sh
 [ -f ~/.config/shell/common/functions.sh ] && source ~/.config/shell/common/functions.sh
 
-# --- 平台特定（与 shell 无关）---
+# --- 平台特定 ---
 case "$(uname)" in
     Darwin) [ -f ~/.config/shell/platform/macos.sh ] && source ~/.config/shell/platform/macos.sh ;;
     Linux)  [ -f ~/.config/shell/platform/linux.sh ] && source ~/.config/shell/platform/linux.sh ;;
 esac
 
-# --- 补全系统（原生 compinit，须在依赖 compdef 的工具前初始化）---
-[ -f ~/.config/shell/zsh/completion.zsh ] && source ~/.config/shell/zsh/completion.zsh
+# --- 补全系统（bash-completion 包）---
+[ -f ~/.config/shell/bash/completion.bash ] && source ~/.config/shell/bash/completion.bash
 
-# --- zsh 专属 ---
+# --- bash 专属 ---
 # starship 提示符（若安装）
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"
 # fzf 模糊查找（若安装）
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh 2>/dev/null)"
+command -v fzf >/dev/null 2>&1 && eval "$(fzf --bash 2>/dev/null)"
 # zoxide 智能目录跳转（若安装）
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"
 
-# --- 本机私有配置（不纳入版本控制）---
+# --- 本机私有配置 ---
 [ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh

@@ -1,0 +1,21 @@
+# config/starship.toml - 提示符配置（文档：https://starship.rs/config/）
+
+add_newline = true
+format = """$directory$git_branch$git_status$character"""
+command_timeout = 1000
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+
+[git_status]
+style = "bold yellow"

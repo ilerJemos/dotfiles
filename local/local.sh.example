@@ -1,0 +1,18 @@
+# local/local.sh.example - 本机私有配置参考（同步入库，仅供参考）
+#
+# install.sh 会在 ~/.config/shell/local.sh 创建一个【空】文件（不同步入库），
+# 本文件仅作参考。把需要的行复制进 local.sh 并按本机修改即可。
+# 可放：环境变量、别名、密钥、代理地址等本机专属内容。
+
+# --- 代理（供 common/functions.sh 的 proxy_on 读取）---
+# 不同机器代理地址不同，在此按本机填写其一：
+# export DOTFILES_PROXY_URL="http://127.0.0.1:7890"           # HTTP 代理（如 Clash）
+# export DOTFILES_PROXY_URL="socks5://127.0.0.1:1080"         # SOCKS5
+# export DOTFILES_NO_PROXY="localhost,127.0.0.1,::1,*.local"  # 可选，默认排除回环
+# 需要时执行 proxy_on 开启；若希望该机器常驻代理，取消下面一行的注释：
+# proxy_on
+
+# --- 其它本机专属 ---
+# export MY_API_KEY="xxxxxxxx"
+# alias work='cd ~/code/work'
+# export PROJECTS_DIR="$HOME/code"

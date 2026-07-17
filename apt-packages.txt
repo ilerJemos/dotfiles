@@ -1,0 +1,26 @@
+# apt-packages.txt - Linux (Debian/Ubuntu) 依赖
+# 用法：scripts/install.sh 会执行 `apt-get install -y $(grep -vE '^\s*#|^\s*$' apt-packages.txt)`
+#
+# Ubuntu 26.04 起官方源已收录 eza / lazygit / git-delta / starship / zoxide 等
+# 现代工具，可直接 apt 安装；更旧的发行版需按各项目文档另装。
+#
+# 命名差异（Debian/Ubuntu 特有）：
+#   - fd-find  → 可执行文件为 fdfind
+#   - bat      → 可执行文件为 batcat
+#   platform/linux.sh 会在标准名缺失时补回 fd/bat 别名，保持脚本/别名统一。
+git
+zsh
+tmux
+neovim
+ripgrep
+fd-find
+fzf
+bat
+eza
+lazygit
+git-delta
+starship
+zoxide
+jq
+gh
+curl

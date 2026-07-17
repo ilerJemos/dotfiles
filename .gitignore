@@ -17,3 +17,13 @@ local/*.local
 
 # 日志
 *.log
+
+# shell 本机私有配置（整体符号链接 config/shell 时，真实 local.sh 会落入库内）
+config/shell/local.sh
+
+# brew bundle 锁文件
+Brewfile.lock.json
+
+# git 身份私有文件
+config/git/config.local
+

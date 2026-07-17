@@ -1,0 +1,13 @@
+#!/bin/sh
+# bin/dotfiles - dotfiles 便捷命令
+self=$0
+while [ -L "$self" ]; do self=$(readlink "$self" 2>/dev/null || echo "$self"); done
+REPO=$(CDPATH= cd "$(dirname "$self")/.." && pwd)
+
+case "${1:-}" in
+    update) cd "$REPO" && git pull --ff-only && sh "$REPO/scripts/link.sh" ;;
+    status) cd "$REPO" && git status -sb ;;
+    doctor) sh "$REPO/scripts/doctor.sh" ;;
+    path)   printf '%s\n' "$REPO" ;;
+    *) echo "usage: dotfiles {update|status|doctor|path}" ; [ -n "${1:-}" ] && exit 1 ;;
+esac
