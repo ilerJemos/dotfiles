@@ -1,36 +1,65 @@
--- config/nvim/init.lua - Neovim 配置（精简版）
--- 后续可用 lazy.nvim 管理插件：https://github.com/folke/lazy.nvim
+-- Enable Neovim UI2
+require("vim._core.ui2").enable({})
 
--- 基本选项
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.mouse = "a"
-vim.opt.showmode = false
-vim.opt.clipboard = "unnamedplus"
-vim.opt.breakindent = true
-vim.opt.undofile = true
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-vim.opt.signcolumn = "yes"
-vim.opt.updatetime = 250
-vim.opt.timeoutlen = 300
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-vim.opt.termguicolors = true
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.smartindent = true
-vim.opt.completeopt = { "menu", "menuone", "noselect" }
+-- Native package management (vim.pack)
+-- Plugins are installed automatically on first launch
+vim.pack.add({
+  -- Fuzzy finder
+  "https://github.com/ibhagwan/fzf-lua",
 
--- 键位
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
-vim.keymap.set("n", "<C-Left>", "<C-w>h")
-vim.keymap.set("n", "<C-Right>", "<C-w>l")
-vim.keymap.set("n", "<C-Up>", "<C-w>k")
-vim.keymap.set("n", "<C-Down>", "<C-w>j")
-vim.keymap.set("n", "<leader>w", "<cmd>write<CR>", { desc = "Save" })
-vim.keymap.set("n", "<leader>q", "<cmd>quit<CR>", { desc = "Quit" })
-vim.keymap.set({ "n", "v" }, "<leader>y", '"+y', { desc = "Yank to clipboard" })
+  -- File explorer dependencies
+  "https://github.com/nvim-lua/plenary.nvim",
+  "https://github.com/MunifTanjim/nui.nvim",
+
+  -- File explorer
+  "https://github.com/nvim-neo-tree/neo-tree.nvim",
+
+  -- Colorscheme
+  "https://github.com/folke/tokyonight.nvim",
+
+  -- Statusline
+  "https://github.com/nvim-lualine/lualine.nvim",
+
+  -- Treesitter (syntax highlighting)
+  "https://github.com/nvim-treesitter/nvim-treesitter",
+
+  -- Git signs
+  "https://github.com/lewis6991/gitsigns.nvim",
+
+  -- Auto pairs
+  "https://github.com/windwp/nvim-autopairs",
+
+  -- Comment
+  "https://github.com/numToStr/Comment.nvim",
+
+  -- Indent guides
+  "https://github.com/lukas-reineke/indent-blankline.nvim",
+
+  -- LSP
+  -- "https://github.com/neovim/nvim-lspconfig",
+
+  -- Autocompletion
+  -- "https://github.com/hrsh7th/nvim-cmp",
+  -- "https://github.com/hrsh7th/cmp-nvim-lsp",
+  -- "https://github.com/hrsh7th/cmp-buffer",
+})
+
+-- Load options
+require("options")
+
+-- Plugin configurations
+require("configs.tokyonight")
+require("configs.treesitter")
+require("configs.lualine")
+require("configs.neo-tree")
+require("configs.gitsigns")
+require("configs.autopairs")
+require("configs.comment")
+require("configs.indent-blankline")
+
+-- Plugin keybindings
+vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files" })
+vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Live grep" })
+vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Buffers" })
+vim.keymap.set("n", "<leader>fh", "<cmd>FzfLua help_tags<cr>", { desc = "Help tags" })
+vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "File explorer" })
