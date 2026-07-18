@@ -86,3 +86,17 @@ proxy_status() {
             echo "  (DOTFILES_PROXY_URL=${DOTFILES_PROXY_URL}；执行 proxy_on 开启)"
     fi
 }
+
+# --- dotfiles 自更新 ---
+# 拉取最新配置并重新部署符号链接；不重装已安装的命令行工具
+# （仅 git pull --ff-only + scripts/link.sh，等价 `dotfiles update`）。
+# 经 ~/.config/shell 符号链接定位仓库，不依赖 PATH 上的 dotfiles 命令。
+dotfiles_update() {
+    (
+        _repo=$(CDPATH= cd -P "$HOME/.config/shell/../.." 2>/dev/null && pwd) || {
+            echo "dotfiles_update: 无法定位 dotfiles 仓库（~/.config/shell 未链接？先执行 ./install.sh）" >&2
+            exit 1
+        }
+        sh "$_repo/scripts/update.sh"
+    )
+}

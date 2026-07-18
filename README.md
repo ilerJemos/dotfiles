@@ -15,7 +15,7 @@
 ```
 ~/dotfiles
 ├── install.sh              # 部署入口 = scripts/link.sh 薄封装
-├── bootstrap.sh            # 一键引导：clone + 装依赖 + 链接
+├── bootstrap.sh            # 一键引导：装依赖 + 链接（仓库需已克隆）
 ├── Brewfile                # macOS 依赖
 ├── apt-packages.txt        # Linux 依赖
 ├── gitconfig               # -> ~/.gitconfig (include ~/.config/git/config)
@@ -72,7 +72,7 @@ cd ~/dotfiles
 ./bootstrap.sh        # 装依赖(brew/apt) + 建链接
 ```
 
-`bootstrap.sh` 会：克隆（若未克隆）→ `scripts/install.sh` 按平台装依赖 → `scripts/link.sh` 建链接。
+`bootstrap.sh` 会：`scripts/install.sh` 按平台装依赖 → `scripts/link.sh` 建链接（仓库需先手动克隆到本机）。
 
 ### 仅部署链接（依赖已就绪）
 
