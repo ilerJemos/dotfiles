@@ -1,6 +1,6 @@
 # dotfiles
 
-跨 **macOS / Linux** 的个人 dotfiles，遵循 [XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/latest/)，通过符号链接部署。目标：在不同机器上获得一致的 shell / git / tmux / 编辑器体验。
+跨 **macOS / Linux（Debian·Ubuntu / Fedora / Arch）** 的个人 dotfiles，遵循 [XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/latest/)，通过符号链接部署。目标：在不同机器上获得一致的 shell / git / tmux / 编辑器体验。
 
 ## 特性
 
@@ -17,7 +17,10 @@
 ├── install.sh              # 部署入口 = scripts/link.sh 薄封装
 ├── bootstrap.sh            # 一键引导：装依赖 + 链接（仓库需已克隆）
 ├── Brewfile                # macOS 依赖
-├── apt-packages.txt        # Linux 依赖
+├── apt-packages.txt        # Linux (Debian/Ubuntu) 依赖
+├── dnf-packages.txt        # Linux (Fedora) 依赖
+├── pacman-packages.txt     # Linux (Arch) 官方仓库依赖
+├── aur-packages.txt        # Linux (Arch) AUR 依赖
 ├── gitconfig               # -> ~/.gitconfig (include ~/.config/git/config)
 │
 ├── home/                   # -> $HOME 的入口桩
@@ -55,8 +58,10 @@
 │
 ├── scripts/
 │   ├── link.sh             # 符号链接部署（幂等+备份）
-│   ├── install.sh          # 按平台装依赖
-│   ├── install-nvim.sh     # 上游装 Neovim 0.12+（apt 不够新时）
+│   ├── install.sh          # 按平台装依赖（brew/apt/dnf/pacman+AUR）
+│   ├── install-nvim.sh     # 上游装 Neovim 0.12+（系统源不够新时）
+│   ├── install-brew.sh     # macOS 引导安装 Homebrew
+│   ├── install-aur.sh      # Arch 引导安装 yay 并装 AUR 包
 │   ├── doctor.sh           # 健康检查
 │   └── update.sh           # 拉取 + 重链
 │
@@ -71,7 +76,7 @@
 ```sh
 git clone git@github.com:ilerJemos/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-./bootstrap.sh        # 装依赖(brew/apt) + 建链接
+./bootstrap.sh        # 装依赖(brew/apt/dnf/pacman) + 建链接
 ```
 
 `bootstrap.sh` 会：`scripts/install.sh` 按平台装依赖 → `scripts/link.sh` 建链接（仓库需先手动克隆到本机）。
@@ -115,7 +120,7 @@ cd ~/dotfiles
   - 增强：大小写不敏感、方向键菜单选择、分组着色；`AUTO_MENU` / `COMPLETE_IN_WORD` / `NO_LIST_BEEP`。
 - **bash**：`config/shell/bash/completion.bash` 加载 `bash-completion` 包（可选依赖，未随仓库安装）。
   - 装好后 Homebrew 工具的 bash 补全会从 `$HOMEBREW_PREFIX/etc/bash_completion.d/` 被自动加载；`fzf` / `zoxide` 的补全由各自 `eval` 提供。
-  - 可选安装：macOS `brew install bash-completion`；Linux `apt install bash-completion`。
+  - 可选安装：macOS `brew install bash-completion`；Debian/Ubuntu `apt install bash-completion`；Fedora `dnf install bash-completion`；Arch `pacman -S bash-completion`。
 
 ## 工具配置
 
@@ -141,19 +146,23 @@ cd ~/dotfiles
 | 脚本 | 作用 |
 |------|------|
 | `scripts/link.sh` | 符号链接部署（幂等 + 备份） |
-| `scripts/install.sh` | 按平台装依赖（brew bundle / apt）+ tpm |
-| `scripts/install-nvim.sh` | 上游装 Neovim 0.12+（apt 不够新时，免 sudo 装到 ~/.local） |
+| `scripts/install.sh` | 按平台装依赖（brew / apt / dnf / pacman+AUR）+ tpm |
+| `scripts/install-nvim.sh` | 上游装 Neovim 0.12+（系统源不够新时，免 sudo 装到 ~/.local） |
+| `scripts/install-brew.sh` | macOS 引导安装 Homebrew（`dotfiles install-brew`） |
+| `scripts/install-aur.sh` | Arch 引导安装 yay 并装 AUR 包（`dotfiles install-aur`） |
 | `scripts/doctor.sh` | 环境健康检查（工具 / nvim 版本 / 链接） |
 | `scripts/update.sh` | `git pull` + 重新链接 |
-| `bin/dotfiles` | 便捷命令：`dotfiles {update\|install\|install-nvim\|status\|doctor\|path}` |
+| `bin/dotfiles` | 便捷命令：`dotfiles {update\|install\|install-nvim\|install-brew\|install-aur\|status\|doctor\|path}` |
 
-> 改过包列表（`apt-packages.txt` / `Brewfile`）后，执行 `dotfiles install` 安装新增依赖。
-> 系统 nvim < 0.12 时，执行 `dotfiles install-nvim` 从上游装最新稳定版到 `~/.local`（apt 版本不够新时的用户态安装）。
+> 改过包列表（`Brewfile` / `apt-packages.txt` / `dnf-packages.txt` / `pacman-packages.txt` / `aur-packages.txt`）后，执行 `dotfiles install` 安装新增依赖。
+> 系统 nvim < 0.12 时，执行 `dotfiles install-nvim` 从上游装最新稳定版到 `~/.local`（系统源版本不够新时的用户态安装，适用于 Debian/Fedora；Arch 滚动源通常已最新）。
 
 ## 平台说明
 
 - **macOS**：用 Homebrew（`Brewfile`）。Homebrew 前缀自动适配 Apple Silicon(`/opt/homebrew`)/Intel(`/usr/local`)。
-- **Linux**：用 apt（`apt-packages.txt`）。`eza` / `lazygit` / `git-delta` / `starship` 等在 Ubuntu 26.04+ 官方源已收录，可直接 apt 安装；更旧发行版需另装（见 `apt-packages.txt` 注释）。
+- **Linux (Debian/Ubuntu)**：用 apt（`apt-packages.txt`）。`eza` / `lazygit` / `git-delta` / `starship` 等在 Ubuntu 26.04+ 官方源已收录，可直接 apt 安装；更旧发行版需另装（见 `apt-packages.txt` 注释）。
+- **Linux (Fedora)**：用 dnf（`dnf-packages.txt`），逐个安装、缺失包自动跳过。`fd-find` / `bat` 在 Fedora 直接提供标准可执行名 `fd` / `bat`（无 `fdfind` / `batcat` 重命名）。`starship` / `lazygit` / `yazi` 不在官方源；`eza` / `git-delta` / `p7zip-plugins` 视版本而定——缺失项见 `dnf-packages.txt` 注释（cargo / copr / 官方脚本）。
+- **Linux (Arch)**：官方源用 pacman（`pacman-packages.txt`），AUR 包用 yay/paru（`aur-packages.txt`），均逐个安装、缺失/构建失败自动跳过。`starship` / `lazygit` / `yazi` / `git-delta` 仅在 AUR。无 AUR helper 时执行 `dotfiles install-aur` 引导安装 yay。
 
 ## 许可
 

@@ -1,5 +1,8 @@
 # apt-packages.txt - Linux (Debian/Ubuntu) 依赖
-# 用法：scripts/install.sh 会执行 `apt-get install -y $(grep -vE '^\s*#|^\s*$' apt-packages.txt)`
+# 用法：scripts/install.sh 经 pkglist() 读取（去整行注释/空行，剥离行内注释）后执行 apt-get install。
+# 行内注释（"pkg # 说明"）会被自动剥离，可放心标注每行用途。
+#
+# 其它发行版：Fedora 见 dnf-packages.txt；Arch 见 pacman-packages.txt + aur-packages.txt。
 #
 # Ubuntu 26.04 起官方源已收录 eza / lazygit / git-delta / starship / zoxide 等
 # 现代工具，可直接 apt 安装；更旧的发行版需按各项目文档另装。

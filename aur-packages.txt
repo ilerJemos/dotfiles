@@ -1,0 +1,13 @@
+# aur-packages.txt - Linux (Arch) AUR 依赖
+# 用法：scripts/install.sh 经 pkglist() 读取（去整行注释/空行，剥离行内注释），检测到 yay/paru 时执行：
+#   <yay|paru> -S --needed --noconfirm <包名>
+# 无 AUR helper 时运行 `dotfiles install-aur` 引导安装 yay。
+# 行内注释（"pkg # 说明"）会被自动剥离，可放心标注每行用途。
+#
+# AUR 包以普通用户构建（makepkg 不能以 root 运行），勿外加 sudo；
+# yay/paru 内部按需调用 sudo 安装编译好的产物。
+# 官方源包见 pacman-packages.txt；Debian/Ubuntu 见 apt-packages.txt；Fedora 见 dnf-packages.txt。
+starship       # 跨 shell 提示符（AUR；亦可装 starship-bin 免编译版）
+lazygit        # 终端 git TUI（AUR；亦可装 lazygit-bin）
+yazi           # 终端文件管理器（AUR；亦可装 yazi-bin）
+git-delta      # git diff 美化器（AUR；亦可装 delta-git 开发版）

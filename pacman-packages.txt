@@ -1,0 +1,33 @@
+# pacman-packages.txt - Linux (Arch) 官方仓库依赖
+# 用法：scripts/install.sh 经 pkglist() 读取（去整行注释/空行，剥离行内注释）后执行：
+#   sudo pacman -S --needed --noconfirm <包名>
+# 行内注释（"pkg # 说明"）会被自动剥离，可放心标注每行用途。
+#
+# Arch 滚动更新，下列包版本始终较新；AUR 专属包见 aur-packages.txt。
+# 命名差异（Arch 特有）：
+#   - github-cli 提供可执行名 gh（不是 gh）
+#   - fd / bat 即标准可执行名（无 fdfind/batcat 重命名）
+#   - p7zip 已含 7z/7za/7zr（无需额外 plugins 子包）
+git            # 版本控制
+zsh            # 默认交互 shell
+tmux           # 终端复用器
+neovim         # 编辑器（Arch 滚动，版本最新，>=0.12）
+ripgrep        # rg：极速递归搜索
+fd             # fd：快速文件查找
+fzf            # 模糊查找器
+bat            # cat 替代
+eza            # ls 替代（带 git 状态；extra 仓库）
+zoxide         # 智能目录跳转（提供 z）
+jq             # JSON 处理命令行
+github-cli     # gh：GitHub 官方 CLI（包名 github-cli，可执行名 gh）
+curl           # 下载工具（blink.cmp 预编译 / install-nvim.sh 需要）
+xclip          # X11 剪贴板（nvim 系统剪贴板）
+wl-clipboard   # Wayland 剪贴板（nvim 系统剪贴板）
+
+# extract() 解压支持（common/functions.sh）
+unzip          # .zip
+p7zip          # .7z（含 7z/7za/7zr）
+xz             # .xz / .tar.xz（提供 unxz；tar -J）
+
+# AUR 构建工具（install-aur.sh 的 makepkg 依赖）
+base-devel     # gcc/make/patch 等构建工具组（AUR 包编译需要；pacman 按组安装）

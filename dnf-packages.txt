@@ -1,0 +1,50 @@
+# dnf-packages.txt - Linux (Fedora) 依赖
+# 用法：scripts/install.sh 经 pkglist() 读取（去整行注释/空行，剥离行内注释）后执行 dnf install。
+# 行内注释（"pkg # 说明"）会被自动剥离，可放心标注每行用途。
+#
+# 与 Debian/Ubuntu 的命名差异：
+#   - Fedora 的 fd-find / bat 直接提供标准可执行名 fd / bat（无 fdfind/batcat 重命名），
+#     故 platform/linux.sh 的别名补丁在 Fedora 上不会触发。
+#   - p7zip 拆为 p7zip（7za/7zr）与 p7zip-plugins（7z）；extract() 用 `7z x`，两者都装。
+#
+# install.sh 逐个安装本表包，不在当前 Fedora 仓库的会自动跳过、不中止。
+# starship / lazygit / yazi 确定不在官方源（见文末手动安装）；eza / git-delta / p7zip-plugins 视 Fedora 版本而定。
+# 其它发行版见 apt-packages.txt（Debian/Ubuntu）/ pacman-packages.txt + aur-packages.txt（Arch）。
+git            # 版本控制
+zsh            # 默认交互 shell
+tmux           # 终端复用器
+neovim         # 编辑器（配置需 0.12+；若 dnf 版本不足，运行 dotfiles install-nvim）
+ripgrep        # rg：极速递归搜索
+fd-find        # fd：快速文件查找（Fedora 直接提供 fd 可执行名）
+fzf            # 模糊查找器
+bat            # cat 替代（Fedora 直接提供 bat 可执行名）
+eza            # ls 替代（带 git 状态；视 Fedora 版本而定，缺失时见文末 cargo 安装）
+zoxide         # 智能目录跳转（提供 z）
+jq             # JSON 处理命令行
+gh             # GitHub 官方 CLI
+curl           # 下载工具（blink.cmp 预编译 / install-nvim.sh 需要）
+xclip          # X11 剪贴板（nvim 系统剪贴板）
+wl-clipboard   # Wayland 剪贴板（nvim 系统剪贴板）
+
+# extract() 解压支持（common/functions.sh）
+unzip          # .zip
+p7zip          # .7z（提供 7za/7zr）
+p7zip-plugins  # 7z 命令（extract() 用 `7z x`；视 Fedora 版本而定，缺失则仅 7za/7zr 可用）
+xz             # .xz / .tar.xz（提供 unxz；tar -J）
+git-delta      # git diff 美化器（视 Fedora 版本而定，缺失时见文末 cargo 安装）
+
+# --- 以下 Fedora 官方源未收录或未必收录，按注释手动安装 ---
+# starship  跨 shell 提示符
+#   官方安装脚本：curl -sS https://starship.rs/install.sh | sh
+#   或 cargo：cargo install starship
+#   或 copr：sudo dnf copr enable atim/starship && sudo dnf install starship
+# lazygit   终端 git TUI
+#   copr：sudo dnf copr enable pschyska/lazygit && sudo dnf install lazygit
+#   或下 GitHub release 二进制放入 ~/.local/bin
+# yazi      终端文件管理器
+#   cargo：cargo install --locked yazi-fm yazi-cli
+#   或下 GitHub release 二进制放入 ~/.local/bin
+# eza       ls 替代（若上方官方源安装被跳过）
+#   cargo：cargo install eza  或下 GitHub release 二进制放入 ~/.local/bin
+# git-delta git diff 美化器（若上方官方源安装被跳过）
+#   cargo：cargo install git-delta
