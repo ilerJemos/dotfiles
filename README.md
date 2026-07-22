@@ -23,6 +23,7 @@
 ├── home/                   # -> $HOME 的入口桩
 │   ├── .zshrc
 │   ├── .bashrc
+│   ├── .bash_profile
 │   └── .tmux.conf
 │
 ├── config/                 # -> ~/.config
@@ -45,7 +46,7 @@
 │   │   ├── config
 │   │   ├── ignore
 │   │   └── config.local.example
-│   ├── nvim/init.lua
+│   ├── nvim/                # init.lua + lua/{options, configs/}
 │   ├── tmux/tmux.conf
 │   └── starship.toml
 │
@@ -55,6 +56,7 @@
 ├── scripts/
 │   ├── link.sh             # 符号链接部署（幂等+备份）
 │   ├── install.sh          # 按平台装依赖
+│   ├── install-nvim.sh     # 上游装 Neovim 0.12+（apt 不够新时）
 │   ├── doctor.sh           # 健康检查
 │   └── update.sh           # 拉取 + 重链
 │
@@ -85,7 +87,7 @@ cd ~/dotfiles
 | 仓库 | 目标 |
 |------|------|
 | `config/<app>` | `~/.config/<app>` |
-| `home/.zshrc` / `.bashrc` / `.tmux.conf` | `~/` |
+| `home/.zshrc` / `.bashrc` / `.bash_profile` / `.tmux.conf` | `~/` |
 | `gitconfig` | `~/.gitconfig` |
 | `bin/*` | `~/.local/bin/*` |
 
@@ -120,7 +122,13 @@ cd ~/dotfiles
 - **git**：`config/git/config`（别名、`pull.rebase`、默认分支 `main`、冲突样式 `zdiff3`）。身份放 `config.local`（不入库），从 `config.local.example` 复制。
 - **tmux**：`config/tmux/tmux.conf`（vi 模式、鼠标、直观分屏 `|`/`-`、tpm 插件）。经 `~/.tmux.conf` 转发加载（tmux 不自动读 XDG）。
 - **starship**：`config/starship.toml`（精简提示符）。
-- **neovim**：`config/nvim/init.lua`（精简选项与键位；插件管理器待后续增强）。
+- **neovim**（`config/nvim/`）：基于 Neovim 0.12+ 原生 `vim.pack` 管理插件，锁文件 `nvim-pack-lock.json` 保证可复现。
+  - **结构**：`init.lua`（插件清单 + 加载 + 键位）、`lua/options.lua`（选项 + 基础键位）、`lua/configs/*.lua`（每插件一份配置，加载失败用 `pcall` 容错不阻断启动）。
+  - **LSP**：`nvim-lspconfig` + `mason.nvim` / `mason-lspconfig`，采用 0.11+ 的 `vim.lsp.config` / `vim.lsp.enable` API。默认装 `clangd`(C/C++)、`pyright`(Python)、`gopls`(Go)；`:LspInstall <server>` 按需追加。
+  - **补全**：`blink.cmp`（锁 `v1` 稳定分支），来源 `lsp` / `path` / `snippets` / `buffer`，`friendly-snippets` 提供代码片段。Rust fuzzy 可选（`prefer_rust` 静默回退 Lua，无需 cargo）。
+  - **UI / 工具**：`tokyonight` 主题、`lualine`、`neo-tree`（文件树，netrw 已禁用）、`gitsigns`、`nvim-treesitter`、`indent-blankline`、`nvim-autopairs`、`ts-comments`（配合内置 `gc`/`gcc`）、`which-key`（键位发现）、`fzf-lua`（模糊查找，依赖外部 `fzf` + `rg`）。
+  - **键位**：`<leader>` = 空格。`<leader>f*` 查找、`<leader>e` 文件树、`<leader>g*` git（hunk 暂存/重置/预览/blame + fzf git status/commits/branches）、`<leader>c*` 诊断；LSP 用 0.11 默认键位（`K` / `gd` / `grn` / `gra` / `grr` / `gO` / `[d` / `]d`）。
+  - **外部依赖**：`nvim ≥ 0.12`、`fzf`、`rg`、`xclip`/`wl-copy`（系统剪贴板）、`curl`（blink 预编译下载）；`cargo` 可选（blink Rust fuzzy）。`scripts/doctor.sh` 会检查这些。
 
 ## 自定义
 
@@ -134,14 +142,18 @@ cd ~/dotfiles
 |------|------|
 | `scripts/link.sh` | 符号链接部署（幂等 + 备份） |
 | `scripts/install.sh` | 按平台装依赖（brew bundle / apt）+ tpm |
-| `scripts/doctor.sh` | 环境健康检查（工具 + 链接） |
+| `scripts/install-nvim.sh` | 上游装 Neovim 0.12+（apt 不够新时，免 sudo 装到 ~/.local） |
+| `scripts/doctor.sh` | 环境健康检查（工具 / nvim 版本 / 链接） |
 | `scripts/update.sh` | `git pull` + 重新链接 |
-| `bin/dotfiles` | 便捷命令：`dotfiles {update\|status\|doctor\|path}` |
+| `bin/dotfiles` | 便捷命令：`dotfiles {update\|install\|install-nvim\|status\|doctor\|path}` |
+
+> 改过包列表（`apt-packages.txt` / `Brewfile`）后，执行 `dotfiles install` 安装新增依赖。
+> 系统 nvim < 0.12 时，执行 `dotfiles install-nvim` 从上游装最新稳定版到 `~/.local`（apt 版本不够新时的用户态安装）。
 
 ## 平台说明
 
 - **macOS**：用 Homebrew（`Brewfile`）。Homebrew 前缀自动适配 Apple Silicon(`/opt/homebrew`)/Intel(`/usr/local`)。
-- **Linux**：用 apt（`apt-packages.txt`）。`eza` / `lazygit` / `git-delta` / `starship` 在 apt 默认源可能缺失，需另装（见 `apt-packages.txt` 注释）。
+- **Linux**：用 apt（`apt-packages.txt`）。`eza` / `lazygit` / `git-delta` / `starship` 等在 Ubuntu 26.04+ 官方源已收录，可直接 apt 安装；更旧发行版需另装（见 `apt-packages.txt` 注释）。
 
 ## 许可
 

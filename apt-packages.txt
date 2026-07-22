@@ -5,23 +5,30 @@
 # 现代工具，可直接 apt 安装；更旧的发行版需按各项目文档另装。
 #
 # 命名差异（Debian/Ubuntu 特有）：
-#   - fd-find  → 可执行文件为 fdfind
-#   - bat      → 可执行文件为 batcat
+#   - fd-find  -> 可执行文件为 fdfind
+#   - bat      -> 可执行文件为 batcat
 #   platform/linux.sh 会在标准名缺失时补回 fd/bat 别名，保持脚本/别名统一。
-git
-zsh
-tmux
-neovim
-ripgrep
-fd-find
-fzf
-bat
-eza
-lazygit
-git-delta
-starship
-zoxide
-jq
-gh
-curl
-yazi
+git            # 版本控制
+zsh            # 默认交互 shell
+tmux           # 终端复用器
+neovim         # 编辑器（配置需 0.12+；旧源版本不足时用 scripts/install-nvim.sh）
+ripgrep        # rg：极速递归搜索
+fd-find        # fd：快速文件查找（可执行名 fdfind，由 linux.sh 补 fd 别名）
+fzf            # 模糊查找器
+bat            # cat 替代（可执行名 batcat，由 linux.sh 补 bat 别名）
+eza            # ls 替代（带 git 状态）
+lazygit        # 终端 git TUI
+git-delta      # git diff 美化器
+starship       # 跨 shell 提示符
+zoxide         # 智能目录跳转（提供 z）
+jq             # JSON 处理命令行
+gh             # GitHub 官方 CLI
+curl           # 下载工具（blink.cmp 预编译 / install-nvim.sh 需要）
+xclip          # X11 剪贴板（nvim 系统剪贴板）
+wl-clipboard   # Wayland 剪贴板（nvim 系统剪贴板）
+yazi           # 终端文件管理器
+
+# extract() 解压支持（common/functions.sh）
+unzip          # .zip
+p7zip-full     # .7z
+xz-utils       # .xz / .tar.xz

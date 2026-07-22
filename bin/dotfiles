@@ -1,13 +1,17 @@
 #!/bin/sh
-# bin/dotfiles - dotfiles 便捷命令
+# bin/dotfiles - dotfiles 便捷命令（被 link.sh 链接到 ~/.local/bin/dotfiles）
+# 经符号链接定位仓库根，再分发到各子脚本。
 self=$0
+# 解析符号链接：若 $0 是链接则一路 readlink 到真实路径，得到本脚本实际位置
 while [ -L "$self" ]; do self=$(readlink "$self" 2>/dev/null || echo "$self"); done
-REPO=$(CDPATH= cd "$(dirname "$self")/.." && pwd)
+REPO=$(CDPATH= cd "$(dirname "$self")/.." && pwd)  # 仓库根 = 本文件所在目录的上一级
 
 case "${1:-}" in
-    update) cd "$REPO" && git pull --ff-only && sh "$REPO/scripts/link.sh" ;;
-    status) cd "$REPO" && git status -sb ;;
-    doctor) sh "$REPO/scripts/doctor.sh" ;;
-    path)   printf '%s\n' "$REPO" ;;
-    *) echo "usage: dotfiles {update|status|doctor|path}" ; [ -n "${1:-}" ] && exit 1 ;;
+    update)  cd "$REPO" && git pull --ff-only && sh "$REPO/scripts/link.sh" ;;  # 拉取最新并重新链接
+    install) sh "$REPO/scripts/install.sh" ;;          # 按平台安装系统依赖（brew/apt + tpm）
+    install-nvim) sh "$REPO/scripts/install-nvim.sh" ;; # 从 GitHub 装/升级 nvim 到 0.12+
+    status)  cd "$REPO" && git status -sb ;;           # 仓库的简短 git 状态
+    doctor)  sh "$REPO/scripts/doctor.sh" ;;           # 环境健康检查
+    path)    printf '%s\n' "$REPO" ;;                  # 打印仓库根路径
+    *) echo "usage: dotfiles {update|install|install-nvim|status|doctor|path}" ; [ -n "${1:-}" ] && exit 1 ;;  # 用法；有未知参数时退出码 1
 esac

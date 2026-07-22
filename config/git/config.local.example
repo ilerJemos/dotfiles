@@ -1,5 +1,6 @@
 # config/git/config.local.example - git 身份模板
 # 复制为 ~/.config/git/config.local（不入库），填入你的身份信息。
+# 被 config/git/config 的 [include] 加载，覆盖/补充全局配置。
 [user]
-    name = Your Name
-    email = you@example.com
+    name = Your Name       # 提交者显示名
+    email = you@example.com # 提交者邮箱

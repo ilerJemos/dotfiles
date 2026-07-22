@@ -1,26 +1,29 @@
-# ~/.config/git/ignore - 全局 git 忽略
+# ~/.config/git/ignore - 全局 git 忽略（被 config/git/config 的 core.excludesfile 引用）
 
 # 系统
-.DS_Store
-Thumbs.db
+.DS_Store               # macOS 目录元数据
+Thumbs.db               # Windows 缩略图缓存
 
 # 编辑器
-*.swp
-*~
-.vscode/
-.idea/
+*.swp                   # vim 交换文件
+*~                      # 各类编辑器备份
+.vscode/                # VS Code 工作区配置
+.idea/                  # JetBrains 项目配置
 
 # 环境/密钥
-.env
-.env.*
-!.env.example
-*.pem
-*.key
+.env                    # 环境变量文件（含密钥，勿入库）
+.env.*                  # .env.local / .env.production 等
+!.env.example           # 但 .env.example 是模板，允许入库
+*.pem                   # 证书/私钥
+*.key                   # 密钥文件
 
 # 语言常见产物
-__pycache__/
-*.pyc
-node_modules/
-dist/
-build/
-.cache/
+__pycache__/            # Python 字节码缓存目录
+*.pyc                   # Python 编译文件
+node_modules/           # npm/pnpm 依赖目录
+dist/                   # 前端打包产物
+build/                  # 通用构建产物
+.cache/                 # 通用缓存目录
+
+# Claude Code 本机设置（每台机器不同，勿入库）
+**/.claude/settings.local.json

@@ -3,27 +3,43 @@
 # 共享部分位于 config/shell/common/，bash 与 zsh 复用（POSIX 兼容）
 
 # --- 共享部分（bash/zsh 通用）---
-[ -f ~/.config/shell/common/env.sh ]       && source ~/.config/shell/common/env.sh
-[ -f ~/.config/shell/common/path.sh ]      && source ~/.config/shell/common/path.sh
-[ -f ~/.config/shell/common/alias.sh ]     && source ~/.config/shell/common/alias.sh
-[ -f ~/.config/shell/common/functions.sh ] && source ~/.config/shell/common/functions.sh
+[ -f ~/.config/shell/common/env.sh ]       && source ~/.config/shell/common/env.sh       # 环境变量
+[ -f ~/.config/shell/common/path.sh ]      && source ~/.config/shell/common/path.sh      # PATH 组装
+[ -f ~/.config/shell/common/alias.sh ]     && source ~/.config/shell/common/alias.sh     # 别名
+[ -f ~/.config/shell/common/functions.sh ] && source ~/.config/shell/common/functions.sh # 函数（mkcd/extract/代理）
 
 # --- 平台特定（与 shell 无关）---
 case "$(uname)" in
-    Darwin) [ -f ~/.config/shell/platform/macos.sh ] && source ~/.config/shell/platform/macos.sh ;;
-    Linux)  [ -f ~/.config/shell/platform/linux.sh ] && source ~/.config/shell/platform/linux.sh ;;
+    Darwin) [ -f ~/.config/shell/platform/macos.sh ] && source ~/.config/shell/platform/macos.sh ;;  # macOS
+    Linux)  [ -f ~/.config/shell/platform/linux.sh ] && source ~/.config/shell/platform/linux.sh ;;  # Linux
 esac
 
+# --- 历史记录（持久化 + 跨会话共享 + 去重）---
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"  # 历史文件路径（XDG 化）
+HISTSIZE=10000                  # 内存中保留的命令条数
+SAVEHIST=10000                  # 写入磁盘的命令条数
+mkdir -p "${HISTFILE:h}" 2>/dev/null  # 确保历史目录存在（${HISTFILE:h} 是 zsh 的 dirname）
+setopt SHARE_HISTORY          # 多会话实时共享历史（退出即写，启动即读）
+setopt HIST_IGNORE_ALL_DUPS   # 整行重复只保留最新
+setopt HIST_IGNORE_SPACE      # 行首空格的命令不入史（敏感命令）
+setopt HIST_REDUCE_BLANKS     # 入史前压缩多余空白
+
+# --- 交互增强 ---
+setopt AUTO_CD               # 直接输入目录名即 cd
+setopt AUTO_PUSHD            # cd 自动压栈，可用 cd -<Tab> 回溯
+setopt PUSHD_IGNORE_DUPS     # 目录栈去重
+setopt INTERACTIVE_COMMENTS  # 交互式允许 # 注释
+
 # --- 补全系统（原生 compinit，须在依赖 compdef 的工具前初始化）---
-[ -f ~/.config/shell/zsh/completion.zsh ] && source ~/.config/shell/zsh/completion.zsh
+[ -f ~/.config/shell/zsh/completion.zsh ] && source ~/.config/shell/zsh/completion.zsh  # 载入补全
 
 # --- zsh 专属 ---
 # starship 提示符（若安装）
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"  # 初始化 starship for zsh
 # fzf 模糊查找（若安装）
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh 2>/dev/null)"
+command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh 2>/dev/null)"   # 初始化 fzf key-bindings/completion
 # zoxide 智能目录跳转（若安装）
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"      # 初始化 zoxide（提供 z 命令）
 
 # --- 本机私有配置（不纳入版本控制）---
-[ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh
+[ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh   # 载入不入库的本机配置（代理地址等）

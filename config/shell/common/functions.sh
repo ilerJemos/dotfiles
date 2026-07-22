@@ -3,24 +3,24 @@
 
 # 创建目录并进入
 mkcd() {
-    mkdir -p "$1" && cd "$1" || return 1
+    mkdir -p "$1" && cd "$1" || return 1  # 建目录（含父目录）并进入；失败返回 1
 }
 
 # 按扩展名解压压缩包
 extract() {
-    [ -z "$1" ] && { echo "usage: extract <file>" >&2; return 1; }
-    [ -f "$1" ] || { echo "extract: $1: 不是文件" >&2; return 1; }
+    [ -z "$1" ] && { echo "usage: extract <file>" >&2; return 1; }  # 缺参数报错
+    [ -f "$1" ] || { echo "extract: $1: 不是文件" >&2; return 1; }   # 非文件报错
     case "$1" in
-        *.tar.gz|*.tgz)    tar xzf "$1" ;;
-        *.tar.bz2|*.tbz2)  tar xjf "$1" ;;
-        *.tar.xz|*.txz)    tar xJf "$1" ;;
-        *.tar)             tar xf "$1" ;;
-        *.zip)             unzip "$1" ;;
-        *.gz)              gunzip "$1" ;;
-        *.bz2)             bunzip2 "$1" ;;
-        *.xz)              unxz "$1" ;;
-        *.7z)              7z x "$1" ;;
-        *) echo "extract: $1: 未知格式" >&2; return 1 ;;
+        *.tar.gz|*.tgz)    tar xzf "$1" ;;  # tar.gz / tgz
+        *.tar.bz2|*.tbz2)  tar xjf "$1" ;;  # tar.bz2 / tbz2
+        *.tar.xz|*.txz)    tar xJf "$1" ;;  # tar.xz / txz
+        *.tar)             tar xf "$1" ;;   # tar
+        *.zip)             unzip "$1" ;;    # zip
+        *.gz)              gunzip "$1" ;;   # gz（非 tar）
+        *.bz2)             bunzip2 "$1" ;;  # bz2
+        *.xz)              unxz "$1" ;;     # xz
+        *.7z)              7z x "$1" ;;     # 7z
+        *) echo "extract: $1: 未知格式" >&2; return 1 ;;  # 不支持的格式
     esac
 }
 
@@ -43,45 +43,45 @@ extract() {
 
 # 取代理地址：优先参数，其次 DOTFILES_PROXY_URL；都没有则返回 1
 _dotfiles_proxy_url() {
-    if [ -n "$1" ]; then printf '%s' "$1"; return 0; fi
-    if [ -n "$DOTFILES_PROXY_URL" ]; then printf '%s' "$DOTFILES_PROXY_URL"; return 0; fi
-    return 1
+    if [ -n "$1" ]; then printf '%s' "$1"; return 0; fi                          # 有参数：用参数
+    if [ -n "$DOTFILES_PROXY_URL" ]; then printf '%s' "$DOTFILES_PROXY_URL"; return 0; fi # 否则用环境变量
+    return 1                                                                     # 都没有：失败
 }
 
 # 开启代理：proxy_on [url]  （url 缺省取 DOTFILES_PROXY_URL）
 proxy_on() {
-    _purl=$(_dotfiles_proxy_url "$1")
+    _purl=$(_dotfiles_proxy_url "$1")                  # 解析代理地址
     if [ -z "$_purl" ]; then
         unset _purl
-        echo "proxy_on: 未配置代理地址。" >&2
+        echo "proxy_on: 未配置代理地址。" >&2          # 无地址：提示如何配置
         echo "  在 ~/.config/shell/local.sh 设置：export DOTFILES_PROXY_URL=\"http://host:port\"" >&2
         echo "  或临时指定：proxy_on http://127.0.0.1:7890" >&2
         return 1
     fi
-    _pnp="${DOTFILES_NO_PROXY:-localhost,127.0.0.1,::1}"
-    # 同时设大小写
-    export http_proxy="$_purl"  HTTP_PROXY="$_purl"
-    export https_proxy="$_purl" HTTPS_PROXY="$_purl"
-    export all_proxy="$_purl"   ALL_PROXY="$_purl"
-    export no_proxy="$_pnp"     NO_PROXY="$_pnp"
-    echo "proxy on  -> $_purl (no_proxy: $_pnp)"
-    unset _purl _pnp
+    _pnp="${DOTFILES_NO_PROXY:-localhost,127.0.0.1,::1}"  # no_proxy 默认排除回环
+    # 同时设大小写（curl 读小写，Go/Java 常读大写）
+    export http_proxy="$_purl"  HTTP_PROXY="$_purl"    # HTTP
+    export https_proxy="$_purl" HTTPS_PROXY="$_purl"   # HTTPS
+    export all_proxy="$_purl"   ALL_PROXY="$_purl"     # SOCKS 等（all_proxy）
+    export no_proxy="$_pnp"     NO_PROXY="$_pnp"       # 不走代理的主机
+    echo "proxy on  -> $_purl (no_proxy: $_pnp)"       # 反馈当前状态
+    unset _purl _pnp                                   # 清理临时变量
 }
 
 # 关闭代理：清空所有相关环境变量
 proxy_off() {
     unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY \
-          all_proxy ALL_PROXY no_proxy NO_PROXY
+          all_proxy ALL_PROXY no_proxy NO_PROXY        # 逐一 unset
     echo "proxy off -> 已清空代理环境变量"
 }
 
 # 查看代理状态
 proxy_status() {
     if [ -n "$http_proxy" ]; then
-        echo "proxy: ON   http_proxy=$http_proxy"
+        echo "proxy: ON   http_proxy=$http_proxy"      # 已开启：显示地址
         echo "         no_proxy=${no_proxy:-（未设）}"
     else
-        echo "proxy: OFF"
+        echo "proxy: OFF"                              # 未开启
         [ -n "$DOTFILES_PROXY_URL" ] && \
             echo "  (DOTFILES_PROXY_URL=${DOTFILES_PROXY_URL}；执行 proxy_on 开启)"
     fi
@@ -93,10 +93,10 @@ proxy_status() {
 # 经 ~/.config/shell 符号链接定位仓库，不依赖 PATH 上的 dotfiles 命令。
 dotfiles_update() {
     (
-        _repo=$(CDPATH= cd -P "$HOME/.config/shell/../.." 2>/dev/null && pwd) || {
+        _repo=$(CDPATH= cd -P "$HOME/.config/shell/../.." 2>/dev/null && pwd) || {  # 从 ~/.config/shell 回溯两级定位仓库根
             echo "dotfiles_update: 无法定位 dotfiles 仓库（~/.config/shell 未链接？先执行 ./install.sh）" >&2
             exit 1
         }
-        sh "$_repo/scripts/update.sh"
+        sh "$_repo/scripts/update.sh"                  # 执行更新脚本（pull + 重链）
     )
 }

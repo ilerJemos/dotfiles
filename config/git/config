@@ -1,47 +1,47 @@
-# config/git/config - 全局 git 配置（XDG: ~/.config/git/config）
-# 身份信息（user.name/email）放 config.local，不入库。
+# config/git/config - 全局 git 配置（XDG 路径：~/.config/git/config）
+# 身份信息（user.name/email）放在 config.local，不入库。
 
 [include]
-    path = ~/.config/git/config.local
+    path = ~/.config/git/config.local   # 包含本机私有身份（name/email 等）
 
 [init]
-    defaultBranch = main
+    defaultBranch = main                # git init 默认分支名用 main
 
 [pull]
-    rebase = true
+    rebase = true                       # pull 时用 rebase 而非 merge（历史更线性）
 
 [rebase]
-    autosquash = true
-    autostash = true
+    autosquash = true                   # 交互式 rebase 自动整理 fixup!/squash! 提交
+    autostash = true                    # rebase 前自动 stash 工作区，完成后恢复
 
 [push]
-    default = current
-    autoSetupRemote = true
+    default = current                   # push 默认推到当前分支同名远端
+    autoSetupRemote = true              # 首次 push 自动创建远端跟踪分支
 
 [merge]
-    conflictstyle = zdiff3
+    conflictstyle = zdiff3              # 冲突展示用 zdiff3（显示基准 + 双侧，更易解决）
 
 [diff]
-    algorithm = histogram
+    algorithm = histogram               # diff 算法用 histogram（比 myers 更精准）
 
 [color]
-    ui = auto
+    ui = auto                           # 终端自动着色
 
 [core]
-    excludesfile = ~/.config/git/ignore
+    excludesfile = ~/.config/git/ignore # 全局忽略文件
     # 不设 core.editor：沿用 $EDITOR/$VISUAL（由 shell env.sh 提供）
 
 [alias]
-    s = status -sb
-    co = checkout
-    br = branch
-    ci = commit
-    sw = switch
-    unstage = reset HEAD --
-    last = log -1 HEAD
-    lg = log --oneline --graph --decorate -20
-    ll = log --pretty=format:'%C(yellow)%h%Creset %C(green)(%cr)%Creset %C(bold)%s%Creset %C(blue)<%an>%Creset' --graph -20
-    amend = commit --amend --no-edit
+    s = status -sb                      # 简洁状态
+    co = checkout                       # 切换分支
+    br = branch                         # 分支
+    ci = commit                         # 提交
+    sw = switch                         # switch（新式切分支）
+    unstage = reset HEAD --             # 撤销暂存
+    last = log -1 HEAD                  # 看最近一次提交
+    lg = log --oneline --graph --decorate -20  # 简洁图形日志（最近 20 条）
+    ll = log --pretty=format:'%C(yellow)%h%Creset %C(green)(%cr)%Creset %C(bold)%s%Creset %C(blue)<%an>%Creset' --graph -20  # 彩色详细日志
+    amend = commit --amend --no-edit    # 追加到上次提交且不改 message
 
 # --- 可选：delta 美化 diff（安装 git-delta 后取消注释）---
 # [core]
@@ -49,5 +49,5 @@
 # [interactive]
 #     diffFilter = delta --color-only
 # [delta]
-#     navigate = true
-#     side-by-side = true
+#     navigate = true        # n/N 在 diff 块间跳转
+#     side-by-side = true    # 左右对照

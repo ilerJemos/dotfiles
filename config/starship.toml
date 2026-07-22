@@ -1,21 +1,41 @@
 # config/starship.toml - 提示符配置（文档：https://starship.rs/config/）
+# 所有符号均为 ASCII / 基础 Unicode，不依赖 Nerd Font。
 
-add_newline = true
-format = """$directory$git_branch$git_status$character"""
-command_timeout = 1000
+add_newline = true            # 提示符前空一行，与上一条命令输出分隔
+# format 定义提示符布局：先显示目录/git，再换行，下一行显示 ➜ 箭头
+# 换行使提示符箭头独占一行，命令输入更清晰
+format = """$directory$git_branch$git_status
+$character"""
+command_timeout = 1000        # 命令采集超时（ms），超时则跳过该段
 
 [character]
-success_symbol = "[➜](bold green)"
-error_symbol = "[➜](bold red)"
+success_symbol = "[➜](bold green)" # 上一条命令成功时的箭头（绿色）
+error_symbol = "[➜](bold red)"     # 上一条命令失败时的箭头（红色）
 
 [directory]
-truncation_length = 3
-truncate_to_repo = true
-style = "bold cyan"
+truncation_length = 3         # 路径最多显示 3 级父目录
+truncate_to_repo = true       # 在 git 仓库内截断到仓库根目录名
+style = "bold cyan"           # 普通目录青色加粗
+repo_root_style = "bold cyan" # 仓库根目录同样青色加粗
+read_only = " RO"             # 只读目录后缀
+read_only_style = "red"       # 只读后缀红色
 
 [git_branch]
-symbol = " "
-style = "bold purple"
+symbol = "git:"               # 分支前缀（不用 Nerd Font 图标）
+style = "bold purple"         # 分支名紫色加粗
+format = "[$symbol$branch]($style) " # 分支段渲染格式
 
 [git_status]
-style = "bold yellow"
+style = "bold yellow"         # git 状态段黄色加粗
+ahead = "↑"                   # 本地领先远端
+behind = "↓"                  # 本地落后远端
+diverged = "↕"                # 本地与远端分叉
+untracked = "?"               # 未跟踪文件
+stashed = "*"                 # 有 stash
+modified = "!"                # 已修改未暂存
+staged = "+"                  # 已暂存
+renamed = "»"                 # 重命名
+deleted = "-"                 # 删除
+conflicted = "="              # 冲突
+# 状态段格式：有改动时显示 [符号汇总+ahead/behind]，无改动则整段省略
+format = '([\[$all_status$ahead_behind\]]($style)) '
