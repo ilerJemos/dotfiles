@@ -20,6 +20,8 @@ HISTSIZE=10000                  # 内存中保留的命令条数
 SAVEHIST=10000                  # 写入磁盘的命令条数
 mkdir -p "${HISTFILE:h}" 2>/dev/null  # 确保历史目录存在（${HISTFILE:h} 是 zsh 的 dirname）
 setopt SHARE_HISTORY          # 多会话实时共享历史（退出即写，启动即读）
+setopt EXTENDED_HISTORY       # 记录每条命令的时间戳（统一 : 时间戳;命令 扩展格式）
+setopt INC_APPEND_HISTORY     # 每执行一条命令立即追加到文件（非退出时批量写，防覆盖/丢失）
 setopt HIST_IGNORE_ALL_DUPS   # 整行重复只保留最新
 setopt HIST_IGNORE_SPACE      # 行首空格的命令不入史（敏感命令）
 setopt HIST_REDUCE_BLANKS     # 入史前压缩多余空白
@@ -35,7 +37,23 @@ setopt INTERACTIVE_COMMENTS  # 交互式允许 # 注释
 
 # --- zsh 专属 ---
 # starship 提示符（若安装）
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"  # 初始化 starship for zsh
+# 方案选择优先级：starship_font 持久化选择 > fc-list 自动检测
+# 用 `starship_font nerd|plain|auto|status` 自由切换（见 functions.sh）
+if command -v starship >/dev/null 2>&1; then
+    _sf_choice=""
+    [ -f "$HOME/.config/shell/starship-font" ] && _sf_choice=$(cat "$HOME/.config/shell/starship-font" 2>/dev/null)
+    case "$_sf_choice" in
+        nerd)  export STARSHIP_CONFIG="$HOME/.config/starship.toml" ;;             # 强制 Nerd Font
+        plain) export STARSHIP_CONFIG="$HOME/.config/starship-no-nerdfont.toml" ;; # 强制纯 Unicode
+        *)  # auto 或未设置：fc-list 检测（检测不到 Nerd Font 则用纯 Unicode）
+            if command -v fc-list >/dev/null 2>&1 && ! fc-list 2>/dev/null | grep -qi "nerd"; then
+                export STARSHIP_CONFIG="$HOME/.config/starship-no-nerdfont.toml"
+            fi
+            ;;
+    esac
+    unset _sf_choice
+    eval "$(starship init zsh)"  # 初始化 starship for zsh
+fi
 # fzf 模糊查找（若安装）
 command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh 2>/dev/null)"   # 初始化 fzf key-bindings/completion
 # zoxide 智能目录跳转（若安装）
@@ -43,3 +61,8 @@ command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"      # 初始化 
 
 # --- 本机私有配置（不纳入版本控制）---
 [ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh   # 载入不入库的本机配置（代理地址等）
+
+# 若配置文件（优先）或 environment 中已设置代理地址，则自动开启代理
+if [ -n "${DOTFILES_PROXY_URL:-}" ]; then
+  proxy_on
+fi  

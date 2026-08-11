@@ -87,6 +87,60 @@ proxy_status() {
     fi
 }
 
+# --- starship 提示符方案切换 ---
+# 自由选择 starship 用 Nerd Font 图标方案还是纯 Unicode 方案。
+# 用法：starship_font nerd|plain|auto|status
+#   nerd   强制 Nerd Font 图标方案（终端已装并启用 Nerd Font 时用）
+#   plain  强制纯 Unicode 方案（终端无 Nerd Font / 显示乱码时用）
+#   auto   恢复 fc-list 自动检测（默认行为）
+#   status 查看当前会话方案与持久化选择
+# 持久化：nerd/plain 写入 ~/.config/shell/starship-font（不入库），新终端沿用；
+# 当前会话立即生效（starship 每次渲染都读 STARSHIP_CONFIG）。
+starship_font() {
+    _sf_file="$HOME/.config/shell/starship-font"            # 持久化选择文件
+    _sf_nerd="$HOME/.config/starship.toml"                  # Nerd Font 方案配置
+    _sf_plain="$HOME/.config/starship-no-nerdfont.toml"     # 纯 Unicode 方案配置
+    case "$1" in
+        nerd)                                                  # 强制 Nerd Font
+            export STARSHIP_CONFIG="$_sf_nerd"
+            printf 'nerd' > "$_sf_file"
+            echo "starship: Nerd Font 方案（已持久化，新终端沿用）"
+            ;;
+        plain)                                                 # 强制纯 Unicode
+            export STARSHIP_CONFIG="$_sf_plain"
+            printf 'plain' > "$_sf_file"
+            echo "starship: 纯 Unicode 方案（已持久化，新终端沿用）"
+            ;;
+        auto)                                                  # 恢复自动检测
+            rm -f "$_sf_file"
+            unset STARSHIP_CONFIG
+            if command -v fc-list >/dev/null 2>&1 && ! fc-list 2>/dev/null | grep -qi "nerd"; then
+                export STARSHIP_CONFIG="$_sf_plain"           # fc-list 未检测到 Nerd Font
+                echo "starship: 自动检测 -> 纯 Unicode（未检测到 Nerd Font）"
+            else
+                echo "starship: 自动检测 -> Nerd Font（检测到 Nerd Font 或无 fc-list）"
+            fi
+            ;;
+        status|"")                                             # 查看当前状态
+            case "${STARSHIP_CONFIG:-$_sf_nerd}" in
+                *no-nerdfont*) _sf_cur="纯 Unicode" ;;
+                *)             _sf_cur="Nerd Font" ;;
+            esac
+            echo "当前会话：$_sf_cur"
+            if [ -f "$_sf_file" ]; then
+                echo "持久化选择：$(cat "$_sf_file")"
+            else
+                echo "持久化选择：auto（自动检测）"
+            fi
+            ;;
+        *)                                                     # 用法提示
+            echo "用法：starship_font nerd|plain|auto|status" >&2
+            return 1
+            ;;
+    esac
+    unset _sf_file _sf_nerd _sf_plain _sf_cur
+}
+
 # --- dotfiles 自更新 ---
 # 拉取最新配置并重新部署符号链接；不重装已安装的命令行工具
 # （仅 git pull --ff-only + scripts/link.sh，等价 `dotfiles update`）。

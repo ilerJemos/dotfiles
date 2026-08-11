@@ -1,7 +1,8 @@
-# config/starship.toml - Tokyo Night 主题提示符（需 Nerd Font 支持）
+# config/starship-no-nerdfont.toml - Tokyo Night 主题提示符（纯 Unicode，不依赖 Nerd Font）
 # 配色参考：https://github.com/enkia/tokyo-night-vscode-theme
 # Starship 文档：https://starship.rs/config/
-# 所有 Nerd Font 码点均从字体文件直接核对，非凭记忆。
+# 当系统未安装 Nerd Font 时由 zshrc 自动切换到此配置。
+# 所有符号均为基础 Unicode，任何等宽字体均可正确显示。
 #
 # Tokyo Night 色板：
 #   blue=#7aa2f7  cyan=#7dcfff  purple=#bb9af7  yellow=#e0af68
@@ -29,38 +30,37 @@ error_symbol = "[❯](bold #f7768e)"      # 失败：Tokyo Night red
 [directory]
 truncation_length = 3          # 路径最多显示 3 级父目录
 truncate_to_repo = true        # 在 git 仓库内截断到仓库根目录名
-format = "[ $path]($style)"   # Nerd Font 文件夹图标
 style = "bold #7dcfff"          # Tokyo Night cyan
-# 不设 repo_root_style：设了会在 git 仓库根目录走单独渲染路径，丢失上面的文件夹图标
-read_only = " 󰌾"          # 只读目录后缀：Nerd Font 锁图标
+# 不设 repo_root_style：设了会在 git 仓库根目录走单独渲染路径，丢失目录前缀
+read_only = " RO"              # 只读目录后缀（纯文字）
 read_only_style = "#f7768e"
 
 # ── Git 分支 ──
 [git_branch]
-symbol = ""            # Nerd Font 分支图标（官方 preset 同款）
+symbol = "git:"                # 无 Nerd Font，用文字前缀
 format = " on [$symbol $branch]($style)"
 style = "bold #bb9af7"        # Tokyo Night purple
 
-# ── Git 状态（codicon diff 图标，与 VS Code git 视图一致）──
+# ── Git 状态（基础 Unicode 箭头/标点）──
 [git_status]
 style = "bold #e0af68"        # Tokyo Night yellow
 format = ' ([\[$all_status$ahead_behind\]]($style))'
-conflicted = ""          # 冲突
-ahead = ""           # 领先远端
-behind = ""          # 落后远端
-diverged = ""            # 分叉
-untracked = ""       # 未跟踪
-stashed = ""            # 有 stash
-modified = ""        # 已修改未暂存
-staged = ""          # 已暂存
-renamed = ""         # 重命名
-deleted = ""         # 删除
+conflicted = "="               # 冲突
+ahead = "⇡"                    # 领先远端
+behind = "⇣"                   # 落后远端
+diverged = "⇕"                 # 分叉
+untracked = "?"                # 未跟踪
+stashed = "$"                  # 有 stash
+modified = "!"                 # 已修改未暂存
+staged = "+"                   # 已暂存
+renamed = "»"                  # 重命名
+deleted = "✘"                  # 删除
 
 # ── 命令耗时 ──
 [cmd_duration]
 min_time = 2000                # 只显示耗时 >= 2s 的命令
 show_milliseconds = false
-format = "[ $duration]($style)"
+format = "took [$duration]($style)"
 style = "bold #e0af68"        # Tokyo Night yellow
 
 # ── 填充 ──

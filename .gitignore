@@ -20,6 +20,8 @@ local/*.local
 
 # shell 本机私有配置（整体符号链接 config/shell 时，真实 local.sh 会落入库内）
 config/shell/local.sh
+# starship 方案选择（starship_font 函数写入：nerd/plain/auto，本机私有）
+config/shell/starship-font
 
 # brew bundle 锁文件
 Brewfile.lock.json
