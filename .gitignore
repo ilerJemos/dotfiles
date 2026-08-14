@@ -28,4 +28,6 @@ Brewfile.lock.json
 
 # git 身份私有文件
 config/git/config.local
+# git 代理私有文件（proxy_on/off 写入）
+config/git/config.proxy
 

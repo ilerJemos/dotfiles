@@ -3,6 +3,7 @@
 
 [include]
     path = ~/.config/git/config.local   # 包含本机私有身份（name/email 等）
+    path = ~/.config/git/config.proxy   # 包含本机 git 代理（proxy_on/off 写入，缺失静默跳过）
 
 [init]
     defaultBranch = main                # git init 默认分支名用 main

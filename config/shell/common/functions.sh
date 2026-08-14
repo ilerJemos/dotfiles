@@ -35,8 +35,11 @@ extract() {
 # 设计要点（最佳实践）：
 #   - 不自动开启：代理未必常驻，需要时手动 `proxy_on`，不用时 `proxy_off`。
 #     某机器若希望常驻，在 local.sh 末尾加一行 `proxy_on` 即可。
-#   - 只设环境变量：curl / wget / git(libcurl) / npm / pip 等均尊重 *_proxy；
-#     不改写 `git config --global`（避免持久化副作用、跨 shell 串扰、忘记关闭）。
+#   - 环境变量给所有工具：curl / wget / git(libcurl) / npm / pip 等尊重 *_proxy。
+#   - git 额外显式写代理到 ~/.config/git/config.proxy（[http]/[https] proxy）：
+#     该文件不入库，由 config/git/config 的 [include] 加载，缺失时静默跳过；
+#     随 proxy_on/off 增删，不残留、不污染仓库。
+#     不用 `git config --global`——会写穿 ~/.gitconfig 符号链接、改脏仓库。
 #   - 大小写都设：curl 等读小写，Go / Java 等常读大写。
 #   - no_proxy 默认排除本地回环，避免本地请求绕行代理。
 #   - SSH 协议（git@host:）不走 HTTP 代理，需另配 SSH ProxyCommand。
@@ -64,6 +67,10 @@ proxy_on() {
     export https_proxy="$_purl" HTTPS_PROXY="$_purl"   # HTTPS
     export all_proxy="$_purl"   ALL_PROXY="$_purl"     # SOCKS 等（all_proxy）
     export no_proxy="$_pnp"     NO_PROXY="$_pnp"       # 不走代理的主机
+    # git 显式代理：写入私有配置文件（不入库），config/git/config 经 [include] 加载
+    mkdir -p "$HOME/.config/git"                       # 确保目录存在（未链接时也能写）
+    printf '[http]\n\tproxy = %s\n[https]\n\tproxy = %s\n' "$_purl" "$_purl" \
+        > "$HOME/.config/git/config.proxy"             # 覆盖写入（幂等）
     echo "proxy on  -> $_purl (no_proxy: $_pnp)"       # 反馈当前状态
     unset _purl _pnp                                   # 清理临时变量
 }
@@ -72,6 +79,7 @@ proxy_on() {
 proxy_off() {
     unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY \
           all_proxy ALL_PROXY no_proxy NO_PROXY        # 逐一 unset
+    rm -f "$HOME/.config/git/config.proxy"             # 移除 git 代理私有文件
     echo "proxy off -> 已清空代理环境变量"
 }
 
@@ -84,6 +92,11 @@ proxy_status() {
         echo "proxy: OFF"                              # 未开启
         [ -n "$DOTFILES_PROXY_URL" ] && \
             echo "  (DOTFILES_PROXY_URL=${DOTFILES_PROXY_URL}；执行 proxy_on 开启)"
+    fi
+    if [ -f "$HOME/.config/git/config.proxy" ]; then   # git 代理私有文件（proxy_on 写入）
+        echo "         git proxy: ON   $HOME/.config/git/config.proxy"
+    else
+        echo "         git proxy: OFF"
     fi
 }
 
