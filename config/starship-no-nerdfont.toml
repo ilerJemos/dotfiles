@@ -1,37 +1,50 @@
-# config/starship-no-nerdfont.toml - Tokyo Night 主题提示符（纯 Unicode，不依赖 Nerd Font）
+# config/starship-no-nerdfont.toml - Tokyo Night 暗色提示符（纯 Unicode，不依赖 Nerd Font）
+# 与 config/starship.toml 模块一致，仅去掉 Nerd Font 图标与 powerline 分段字符
+# （无 Nerd Font 时这些码点会显示为豆腐块）。由 zshrc 在未检测到 Nerd Font 时自动切换。
 # 配色参考：https://github.com/enkia/tokyo-night-vscode-theme
-# Starship 文档：https://starship.rs/config/
-# 当系统未安装 Nerd Font 时由 zshrc 自动切换到此配置。
-# 所有符号均为基础 Unicode，任何等宽字体均可正确显示。
-#
-# Tokyo Night 色板：
-#   blue=#7aa2f7  cyan=#7dcfff  purple=#bb9af7  yellow=#e0af68
-#   red=#f7768e   green=#9ece6a  fg=#a9b1d6
+# 注意：format/palette 等顶层键必须写在 [palettes.*] 表之前（TOML 表归属规则）。
+
+palette = 'tokyo_night'
 
 add_newline = true             # 提示符前空一行，与上一条命令输出分隔
 command_timeout = 500          # 命令采集超时（ms），超时则跳过该段
 
-# 两行布局：第一行目录/git状态/命令耗时（耗时右对齐），第二行输入提示符
+# 两行布局：第一行目录/git/语言/工具（耗时与时间右对齐），第二行输入提示符
 format = """\
 $directory\
 $git_branch\
 $git_status\
-$fill\
-$cmd_duration\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$package\
 $line_break\
 $character"""
+right_format = "$cmd_duration$time"
 
-# ── 输入提示符 ──
-[character]
-success_symbol = "[❯](bold #7aa2f7)"   # 成功：Tokyo Night blue
-error_symbol = "[❯](bold #f7768e)"      # 失败：Tokyo Night red
+# Tokyo Night 色板（暗色）
+[palettes.tokyo_night]
+bg0 = '#1a1b26'
+bg1 = '#16161e'
+bg2 = '#2f3349'
+bg3 = '#33467c'
+fg  = '#c0caf5'
+comment = '#565f89'
+blue = '#7aa2f7'
+cyan = '#7dcfff'
+green = '#9ece6a'
+yellow = '#e0af68'
+red = '#f7768e'
+purple = '#bb9af7'
+orange = '#ff9e64'
 
 # ── 目录 ──
 [directory]
+style = "bold #7dcfff"          # Tokyo Night cyan
 truncation_length = 3          # 路径最多显示 3 级父目录
 truncate_to_repo = true        # 在 git 仓库内截断到仓库根目录名
-style = "bold #7dcfff"          # Tokyo Night cyan
-# 不设 repo_root_style：设了会在 git 仓库根目录走单独渲染路径，丢失目录前缀
 read_only = " RO"              # 只读目录后缀（纯文字）
 read_only_style = "#f7768e"
 
@@ -56,13 +69,52 @@ staged = "+"                   # 已暂存
 renamed = "»"                  # 重命名
 deleted = "✘"                  # 删除
 
-# ── 命令耗时 ──
+# ── 语言/工具版本（按需出现）──
+[python]
+symbol = "py "
+format = '[$symbol($version) (\($virtualenv\))]($style)'
+style = "bold #9ece6a"        # Tokyo Night green
+
+[nodejs]
+symbol = "node "
+format = "[$symbol($version)]($style)"
+style = "bold #9ece6a"
+
+[rust]
+symbol = "rs "
+format = "[$symbol($version)]($style)"
+style = "bold #9ece6a"
+
+[golang]
+symbol = "go "
+format = "[$symbol($version)]($style)"
+style = "bold #9ece6a"
+
+# ── 容器 / 工具 ──
+[docker_context]
+symbol = "docker:"
+format = "[$symbol $context]($style)"
+style = "bold #565f89"        # Tokyo Night comment
+
+[package]
+symbol = "pkg "
+format = "[$symbol$version]($style)"
+style = "bold #565f89"
+
+# ── 右侧：命令耗时 + 时间 ──
 [cmd_duration]
 min_time = 2000                # 只显示耗时 >= 2s 的命令
 show_milliseconds = false
-format = "took [$duration]($style)"
+format = "[took $duration]($style)"
 style = "bold #e0af68"        # Tokyo Night yellow
 
-# ── 填充 ──
-[fill]
-symbol = " "                   # 空白填充，将命令耗时推到行尾右对齐
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[$time]($style)"
+style = "#565f89"
+
+# ── 输入提示符 ──
+[character]
+success_symbol = "[❯](bold #7aa2f7)"   # 成功：Tokyo Night blue
+error_symbol = "[❯](bold #f7768e)"      # 失败：Tokyo Night red

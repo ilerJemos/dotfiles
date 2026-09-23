@@ -1,68 +1,178 @@
-# config/starship.toml - Tokyo Night 主题提示符（需 Nerd Font 支持）
+# config/starship.toml - Tokyo Night 暗色 · powerlevel10k 分段式提示符（需 Nerd Font）
 # 配色参考：https://github.com/enkia/tokyo-night-vscode-theme
+# 布局参考：starship 官方内置 preset gruvbox-rainbow / pastel-powerline（powerlevel10k 式彩色分段）
 # Starship 文档：https://starship.rs/config/
-# 所有 Nerd Font 码点均从字体文件直接核对，非凭记忆。
-#
-# Tokyo Night 色板：
-#   blue=#7aa2f7  cyan=#7dcfff  purple=#bb9af7  yellow=#e0af68
-#   red=#f7768e   green=#9ece6a  fg=#a9b1d6
+# 说明：
+#   - format/palette 等顶层键必须写在 [palettes.*] 表之前（TOML 表归属规则）。
+#   - 所有 Nerd Font 码点用 \uXXXX / \U000XXXXX 转义书写，取自官方 preset
+#     nerd-font-symbols 与旧配置（原作者已从字体文件核对），文件纯 ASCII、解码确定。
+#   - 彩色段之间的 powerline 分隔符（\uE0B0）写在「组首模块」的 format 里，
+#     模块为空时自然隐藏，避免空段残留分隔符（比官方 preset 硬编码分隔更干净）。
+
+palette = 'tokyo_night'
 
 add_newline = true             # 提示符前空一行，与上一条命令输出分隔
 command_timeout = 500          # 命令采集超时（ms），超时则跳过该段
 
-# 两行布局：第一行目录/git状态/命令耗时（耗时右对齐），第二行输入提示符
+# 分段式两行布局（powerlevel10k 风）：
+#   第一行：彩色分段（OS/用户 → 目录 → git → 语言 → 容器/工具），右侧灰色时间；
+#   第二行：输入提示符。
+#   \uE0B6 = 圆角左帽  \uE0B0 = 右箭头分隔符  \uE0B4 = 圆角右帽
 format = """\
+[\uE0B6](fg:purple)\
+$os\
+$username\
+[\uE0B0](bg:blue fg:purple)\
 $directory\
 $git_branch\
 $git_status\
-$fill\
-$cmd_duration\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$hostname\
+$package\
+$shlvl\
+$jobs\
+[\uE0B4 ](fg:bg3)\
 $line_break\
 $character"""
+right_format = "$cmd_duration$time"   # 右侧：命令耗时（慢命令才出现）+ 时间
 
-# ── 输入提示符 ──
-[character]
-success_symbol = "[❯](bold #7aa2f7)"   # 成功：Tokyo Night blue
-error_symbol = "[❯](bold #f7768e)"      # 失败：Tokyo Night red
+# Tokyo Night 色板（暗色，全部为深底配高对比前景）
+[palettes.tokyo_night]
+bg0 = '#1a1b26'      # 终端背景
+bg1 = '#16161e'      # 更深一档背景（未启用）
+bg2 = '#2f3349'
+bg3 = '#33467c'      # 中蓝灰（工具段背景）
+fg  = '#c0caf5'      # 主前景
+comment = '#565f89'  # 次要前景（右侧灰色时间）
+blue = '#7aa2f7'
+cyan = '#7dcfff'
+green = '#9ece6a'
+yellow = '#e0af68'
+red = '#f7768e'
+purple = '#bb9af7'
+orange = '#ff9e64'
+
+# ── 操作系统（顶格首段，p10k 同款 OS 图标）──
+[os]
+disabled = false
+style = "bg:purple fg:bg0"
+format = "[ $symbol ]($style)"
+[os.symbols]
+Linux = "\uF31A"
+Ubuntu = "\uF31B"
+Debian = "\uF306"
+Fedora = "\uF30A"
+Arch = "\uF303"
+Manjaro = "\uF312"
+Alpine = "\uF300"
+CentOS = "\uF304"
+Redhat = "\uF316"
+Macos = "\uF302"
+Android = "\uF17B"
+Amazon = "\uF270"
+NixOS = "\uF313"
+
+# ── 用户名（root 时转红）──
+[username]
+show_always = true
+style_user = "bg:purple fg:bg0"
+style_root = "bg:red fg:bg0"
+format = "[ $user ]($style)"
 
 # ── 目录 ──
 [directory]
+style = "bg:blue fg:bg0"
+format = "[\uEA83 $path]($style)"     # \uEA83 = 文件夹图标
 truncation_length = 3          # 路径最多显示 3 级父目录
 truncate_to_repo = true        # 在 git 仓库内截断到仓库根目录名
-format = "[ $path]($style)"   # Nerd Font 文件夹图标
-style = "bold #7dcfff"          # Tokyo Night cyan
-# 不设 repo_root_style：设了会在 git 仓库根目录走单独渲染路径，丢失上面的文件夹图标
-read_only = " 󰌾"          # 只读目录后缀：Nerd Font 锁图标
-read_only_style = "#f7768e"
+truncation_symbol = "\u2026/"  # 截断标记：…
+read_only = " \uF033E"         # 只读目录后缀：\uF033E = 锁图标
+read_only_style = "bg:blue fg:red"
 
-# ── Git 分支 ──
+# ── Git 分支（cyan 段组首，自带 blue→cyan 分隔符）──
 [git_branch]
-symbol = ""            # Nerd Font 分支图标（官方 preset 同款）
-format = " on [$symbol $branch]($style)"
-style = "bold #bb9af7"        # Tokyo Night purple
+symbol = "\uF418"              # \uF418 = 分支图标（官方 preset 同款）
+format = "[\uE0B0](bg:cyan fg:blue) $symbol$branch "
+style = "bg:cyan fg:bg0"
 
 # ── Git 状态（codicon diff 图标，与 VS Code git 视图一致）──
 [git_status]
-style = "bold #e0af68"        # Tokyo Night yellow
-format = ' ([\[$all_status$ahead_behind\]]($style))'
-conflicted = ""          # 冲突
-ahead = ""           # 领先远端
-behind = ""          # 落后远端
-diverged = ""            # 分叉
-untracked = ""       # 未跟踪
-stashed = ""            # 有 stash
-modified = ""        # 已修改未暂存
-staged = ""          # 已暂存
-renamed = ""         # 重命名
-deleted = ""         # 删除
+style = "bg:cyan fg:bg0"
+format = '[ $all_status$ahead_behind ]($style)'
+conflicted = "\uEA6C"          # 冲突
+ahead = "\uEAA1"               # 领先远端
+behind = "\uEA9A"              # 落后远端
+diverged = "\uEAE1"            # 分叉
+untracked = "\uEB32"           # 未跟踪
+stashed = "\uEB09"             # 有 stash
+modified = "\uEADE"            # 已修改未暂存
+staged = "\uEADC"              # 已暂存
+renamed = "\uEAE0"             # 重命名
+deleted = "\uEADF"             # 删除
 
-# ── 命令耗时 ──
+# ── 语言/工具版本（绿色段；按需出现，进对应项目才显示）──
+[python]
+symbol = "\uE235 "
+format = '[](bg:green fg:cyan) $symbol($version) (\($virtualenv\)) '
+style = "bg:green fg:bg0"
+
+[nodejs]
+symbol = "\uE718 "
+style = "bg:green fg:bg0"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = "\U000F1617 "
+style = "bg:green fg:bg0"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = "\uE627 "
+style = "bg:green fg:bg0"
+format = '[ $symbol($version) ]($style)'
+
+# ── 容器 / 工具（中蓝灰段；docker_context 为组首，自带 green→bg3 分隔符）──
+[docker_context]
+symbol = "\uF308 "
+format = '[](bg:bg3 fg:green) $symbol$context '
+style = "bg:bg3 fg:fg"
+
+[hostname]
+style = "bg:bg3 fg:fg"
+format = "[ $hostname ]($style)"
+
+[package]
+symbol = "\U000F03D7 "
+style = "bg:bg3 fg:fg"
+format = '[ $symbol$version ]($style)'
+
+[shlvl]
+style = "bg:bg3 fg:fg"
+format = '[ $symbol$shlvl ]($style)'
+
+[jobs]
+style = "bg:bg3 fg:fg"
+format = '[ $symbol$number ]($style)'
+
+# ── 右侧：命令耗时 + 时间 ──
 [cmd_duration]
 min_time = 2000                # 只显示耗时 >= 2s 的命令
 show_milliseconds = false
-format = "[ $duration]($style)"
-style = "bold #e0af68"        # Tokyo Night yellow
+format = "[\uF43A $duration]($style)"   # \uF43A = 时钟图标
+style = "fg:yellow"
 
-# ── 填充 ──
-[fill]
-symbol = " "                   # 空白填充，将命令耗时推到行尾右对齐
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[$time]($style)"
+style = "fg:comment"
+
+# ── 输入提示符 ──
+[character]
+success_symbol = "[❯](bold fg:cyan)"      # 成功：cyan
+error_symbol = "[❯](bold fg:red)"         # 失败：red
+vimcmd_symbol = "[❮](bold fg:green)"       # Vim 普通模式：green
